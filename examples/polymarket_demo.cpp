@@ -241,10 +241,7 @@ int main(int argc, char* argv[]) {
     if (!proxy_wallet.empty()) {
         std::cout << "Proxy Wallet: " << proxy_wallet << "\n";
     } else {
-        std::cout << "Proxy Wallet: [Not Configured - Using demo defaults]\n";
-        // Fallback hardcoded address for default demo behavior if user hasn't set it
-        // Uncomment to force a default: 
-        proxy_wallet = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b";
+        std::cout << "Proxy Wallet: [Not Configured]\n";
     }
     
     // Create client

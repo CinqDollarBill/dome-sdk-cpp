@@ -11,9 +11,7 @@
 
 namespace dome {
 
-// ============================================================================
 // Configuration Types
-// ============================================================================
 
 /**
  * Configuration options for initializing the Dome SDK.
@@ -39,9 +37,7 @@ struct RequestConfig {
     std::map<std::string, std::string> headers;
 };
 
-// ============================================================================
 // Market Price Types
-// ============================================================================
 
 /**
  * Response from the market price endpoint.
@@ -65,9 +61,7 @@ struct GetMarketPriceParams {
     std::optional<int64_t> at_time;
 };
 
-// ============================================================================
 // Candlestick Types
-// ============================================================================
 
 /**
  * Price data for a candlestick.
@@ -175,9 +169,7 @@ struct GetCandlesticksParams {
     std::optional<int> interval;  // 1 = 1m, 60 = 1h, 1440 = 1d
 };
 
-// ============================================================================
 // Wallet PnL Types
-// ============================================================================
 
 /**
  * PnL data point.
@@ -241,9 +233,7 @@ struct GetWalletPnLParams {
     std::optional<int64_t> end_time;
 };
 
-// ============================================================================
 // Orders Types
-// ============================================================================
 
 /**
  * Pagination data.
@@ -330,9 +320,7 @@ struct GetOrdersParams {
     std::optional<std::string> user;
 };
 
-// ============================================================================
 // Polymarket Orderbooks Types
-// ============================================================================
 
 /**
  * Orderbook snapshot data.
@@ -404,9 +392,7 @@ struct GetOrderbooksParams {
     std::optional<std::string> pagination_key;
 };
 
-// ============================================================================
 // Polymarket Markets Types
-// ============================================================================
 
 /**
  * Market side/outcome data.
@@ -499,9 +485,7 @@ struct GetMarketsParams {
     std::optional<int> offset;
 };
 
-// ============================================================================
 // Polymarket Activity Types
-// ============================================================================
 
 /**
  * Activity data.
@@ -581,9 +565,7 @@ struct GetActivityParams {
     std::optional<int> offset;
 };
 
-// ============================================================================
 // WebSocket Types
-// ============================================================================
 
 /**
  * Filters for WebSocket subscription.
@@ -626,9 +608,7 @@ struct ActiveSubscription {
 
 using OrderEventCallback = std::function<void(const WebSocketOrderEvent&)>;
 
-// ============================================================================
 // Error Types
-// ============================================================================
 
 /**
  * API error response.
@@ -645,9 +625,7 @@ public:
         : std::runtime_error(message), status_code(code), response_body(body) {}
 };
 
-// ============================================================================
 // HTTP Client Types
-// ============================================================================
 
 enum class HTTPMethod {
     GET,
