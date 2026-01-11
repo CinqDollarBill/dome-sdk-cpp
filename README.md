@@ -35,7 +35,7 @@ export DOME_API_KEY="your-api-key"
 ./polymarket_demo
 ```
 
-## Quick Start
+## Basic Usage
 
 ```cpp
 #include <dome_api_sdk/client.hpp>
@@ -44,13 +44,8 @@ export DOME_API_KEY="your-api-key"
 using namespace dome;
 
 int main() {
-    // Initialize with config map (like Python SDK)
-    DomeClient dome({{"api_key", "your-dome-api-key-here"}});
-    
-    // Or use typed config
-    dome::DomeSDKConfig config;
-    config.api_key = "your-key";
-    DomeClient dome2(config);
+    // Initialize client (automatically uses DOME_API_KEY env var)
+    DomeClient dome;
     
     // Get market price
     auto price = dome.polymarket.markets.get_market_price({
@@ -70,14 +65,38 @@ int main() {
 }
 ```
 
-To run this `quickstart` example:
+## Running Examples
+
+The SDK comes with two examples in the `examples/` directory:
+
+### 1. Polymarket Demo (`polymarket_demo`)
+A comprehensive demo showcasing all API endpoints (Markets, Orders, Wallet, Activity, WebSocket).
+
+```bash
+# Build
+cd build && make
+
+# Run (requires API key)
+export DOME_API_KEY="your-api-key"
+./polymarket_demo
+
+# Or pass key as argument
+./polymarket_demo "your-api-key"
+```
+
+### 2. Basic Example (`main`)
+This example (found in `examples/main.cpp`) demonstrates the basic usage pattern shown above. Note that `main.cpp` includes additional logic to load the API key from a `.env` file, whereas the simplest SDK usage relies on the `DOME_API_KEY` environment variable directly.
+
 ```bash
 # Build
 cd build && make
 
 # Run
+export DOME_API_KEY="your-api-key"
 ./main
 ```
+
+> **Tip**: The `main` example also supports loading the API key from a `.env` file in the current or parent directory.
 
 ## API Reference
 
