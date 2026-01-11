@@ -5,11 +5,7 @@
  * through the Dome SDK.
  * 
  * Usage:
- *   export DOME_API_KEY="your-api-key"
  *   ./polymarket_demo
- * 
- * Or:
- *   ./polymarket_demo your-api-key
  */
 
 #include <iostream>
