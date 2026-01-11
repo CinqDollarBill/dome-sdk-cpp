@@ -1,10 +1,11 @@
-#ifndef DOME_EXAMPLES_UTILS_HPP
-#define DOME_EXAMPLES_UTILS_HPP
+#ifndef DOME_UTILS_HPP
+#define DOME_UTILS_HPP
 
 #include <string>
 #include <fstream>
 #include <cstdlib>
-#include <iostream>
+
+namespace dome {
 
 inline std::string get_env_var(const std::string& key) {
     const char* val = std::getenv(key.c_str());
@@ -25,25 +26,18 @@ inline std::string parse_env_file(const std::string& path, const std::string& ke
 }
 
 inline std::string load_config_value(const std::string& key) {
-    // 1. Check environment variable
     std::string val = get_env_var(key);
     if (!val.empty()) return val;
     
-    // 2. Check .env in current directory
     val = parse_env_file(".env", key);
     if (!val.empty()) return val;
     
-    // 3. Check .env in parent directory
     val = parse_env_file("../.env", key);
     if (!val.empty()) return val;
     
     return "";
 }
 
-inline void print_separator(const std::string& title) {
-    std::cout << "\n" << std::string(60, '=') << "\n";
-    std::cout << " " << title << "\n";
-    std::cout << std::string(60, '=') << "\n\n";
-}
+}  // namespace dome
 
-#endif // DOME_EXAMPLES_UTILS_HPP
+#endif  // DOME_UTILS_HPP

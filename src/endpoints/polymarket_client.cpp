@@ -17,7 +17,6 @@ PolymarketClient::PolymarketClient(const DomeSDKConfig& config)
       markets(config),
       orders(config),
       wallet(config),
-      activity(config),
-      websocket(resolve_api_key(config)) {}
+      activity(config) {}
 
 }  // namespace dome

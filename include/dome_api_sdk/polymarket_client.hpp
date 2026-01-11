@@ -10,7 +10,6 @@
 #include "orders_endpoints.hpp"
 #include "wallet_endpoints.hpp"
 #include "activity_endpoints.hpp"
-#include "polymarket_websocket.hpp"
 
 namespace dome {
 
@@ -24,7 +23,7 @@ public:
     OrdersEndpoints orders;
     WalletEndpoints wallet;
     ActivityEndpoints activity;
-    PolymarketWebSocketClient websocket;
+
 
 private:
     DomeSDKConfig config_;

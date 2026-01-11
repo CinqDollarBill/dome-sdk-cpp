@@ -15,9 +15,15 @@
 #include <iostream>
 #include <iomanip>
 #include <dome_api_sdk/client.hpp>
-#include "utils.hpp"
+#include <dome_api_sdk/utils.hpp>
 
 using namespace dome;
+
+void print_separator(const std::string& title) {
+    std::cout << "\n" << std::string(60, '=') << "\n";
+    std::cout << " " << title << "\n";
+    std::cout << std::string(60, '=') << "\n\n";
+}
 
 void demo_market_price(DomeClient& dome) {
     print_separator("Market Price");

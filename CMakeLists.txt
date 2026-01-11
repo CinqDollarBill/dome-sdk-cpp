@@ -31,7 +31,7 @@ add_library(dome_sdk
     src/endpoints/orders_endpoints.cpp
     src/endpoints/wallet_endpoints.cpp
     src/endpoints/activity_endpoints.cpp
-    src/endpoints/polymarket_websocket.cpp
+
     src/endpoints/polymarket_client.cpp
     src/client.cpp
 )
