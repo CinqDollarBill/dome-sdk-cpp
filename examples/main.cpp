@@ -1,48 +1,12 @@
 #include <iostream>
 #include <iomanip>
 #include <dome_api_sdk/client.hpp>
+#include "utils.hpp"
 
 using namespace dome;
 
-#include <fstream>
-#include <string>
-
-std::string get_env_var(const std::string& key) {
-    const char* val = std::getenv(key.c_str());
-    return val ? std::string(val) : "";
-}
-
-std::string parse_env_file(const std::string& path, const std::string& key) {
-    std::ifstream file(path);
-    if (!file.is_open()) return "";
-    
-    std::string line;
-    while (std::getline(file, line)) {
-        if (line.substr(0, key.length()) == key && line[key.length()] == '=') {
-            return line.substr(key.length() + 1);
-        }
-    }
-    return "";
-}
-
-std::string load_api_key() {
-    // 1. Check environment variable
-    std::string key = get_env_var("DOME_API_KEY");
-    if (!key.empty()) return key;
-    
-    // 2. Check .env in current directory
-    key = parse_env_file(".env", "DOME_API_KEY");
-    if (!key.empty()) return key;
-    
-    // 3. Check .env in parent directory
-    key = parse_env_file("../.env", "DOME_API_KEY");
-    if (!key.empty()) return key;
-    
-    return "";
-}
-
 int main() {
-    std::string api_key = load_api_key();
+    std::string api_key = load_config_value("DOME_API_KEY");
     if (api_key.empty()) {
         std::cerr << "Error: DOME_API_KEY not found in environment or .env file.\n";
         return 1;

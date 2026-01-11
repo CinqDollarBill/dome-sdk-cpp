@@ -15,14 +15,9 @@
 #include <iostream>
 #include <iomanip>
 #include <dome_api_sdk/client.hpp>
+#include "utils.hpp"
 
 using namespace dome;
-
-void print_separator(const std::string& title) {
-    std::cout << "\n" << std::string(60, '=') << "\n";
-    std::cout << " " << title << "\n";
-    std::cout << std::string(60, '=') << "\n\n";
-}
 
 void demo_market_price(DomeClient& dome) {
     print_separator("Market Price");
@@ -122,12 +117,19 @@ void demo_orderbooks(DomeClient& dome) {
     }
 }
 
-void demo_orders(DomeClient& dome) {
+void demo_orders(DomeClient& dome, const std::string& wallet_address) {
     print_separator("Orders");
     
     try {
         GetOrdersParams params;
-        params.market_slug = "bitcoin-up-or-down-july-25-8pm-et";
+        
+        // Use wallet address if provided, otherwise query by market
+        if (!wallet_address.empty()) {
+            std::cout << "Fetching orders for user: " << wallet_address << "\n";
+            params.user = wallet_address;
+        } else {
+            params.market_slug = "bitcoin-up-or-down-july-25-8pm-et";
+        }
         params.limit = 10;
         
         auto result = dome.polymarket.orders.get_orders(params);
@@ -147,12 +149,17 @@ void demo_orders(DomeClient& dome) {
     }
 }
 
-void demo_wallet_pnl(DomeClient& dome) {
+void demo_wallet_pnl(DomeClient& dome, const std::string& wallet_address) {
     print_separator("Wallet PnL");
     
+    if (wallet_address.empty()) {
+        std::cout << "Skipping Wallet PnL demo (no PROXY_WALLET configured)\n";
+        return;
+    }
+
     try {
         GetWalletPnLParams params;
-        params.wallet_address = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b";
+        params.wallet_address = wallet_address;
         params.granularity = Granularity::day;
         params.start_time = 1726857600;
         params.end_time = 1758316829;
@@ -174,12 +181,17 @@ void demo_wallet_pnl(DomeClient& dome) {
     }
 }
 
-void demo_activity(DomeClient& dome) {
+void demo_activity(DomeClient& dome, const std::string& wallet_address) {
     print_separator("Activity");
+
+    if (wallet_address.empty()) {
+        std::cout << "Skipping Activity demo (no PROXY_WALLET configured)\n";
+        return;
+    }
     
     try {
         GetActivityParams params;
-        params.user = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b";
+        params.user = wallet_address;
         params.limit = 10;
         
         auto result = dome.polymarket.activity.get_activity(params);
@@ -199,62 +211,35 @@ void demo_activity(DomeClient& dome) {
     }
 }
 
-void demo_websocket(DomeClient& dome) {
-    print_separator("WebSocket (Placeholder Demo)");
-    
-    try {
-        auto& ws = dome.polymarket.websocket;
-        
-        // Connect
-        ws.connect();
-        std::cout << "Connected: " << (ws.is_connected() ? "yes" : "no") << "\n";
-        
-        // Subscribe (placeholder - no actual messages received)
-        SubscribeFilters params;
-        params.users = std::vector<std::string>{"0x6031b6eed1c97e853c6e0f03ad3ce3529351f96d"};
-        
-        auto sub_id = ws.subscribe(params, [](const WebSocketOrderEvent& event) {
-            std::cout << "Order event received!\n";
-        });
-        std::cout << "Subscription ID: " << sub_id << "\n";
-        
-        // Get active subscriptions
-        auto subs = ws.get_active_subscriptions();
-        std::cout << "Active subscriptions: " << subs.size() << "\n";
-        
-        // Cleanup
-        ws.unsubscribe(sub_id);
-        ws.disconnect();
-        std::cout << "\nWebSocket demo complete.\n";
-        std::cout << "\nNOTE: Full WebSocket functionality requires a WebSocket library.\n";
-        std::cout << "This is a placeholder demonstrating the API structure.\n";
-    } catch (const DomeAPIError& e) {
-        std::cerr << "WebSocket Error: " << e.what() << "\n";
-    }
-}
-
 int main(int argc, char* argv[]) {
     std::cout << "Starting dome-sdk-cpp demo\n";
     
-    // Get API key from argument or environment
-    std::string api_key;
-    if (argc > 1) {
+    // 1. Load API Key
+    std::string api_key = load_config_value("DOME_API_KEY");
+    
+    // Check command line arg as fallback (backward compatibility)
+    if (api_key.empty() && argc > 1) {
         api_key = argv[1];
-    } else {
-        const char* env_key = std::getenv("DOME_API_KEY");
-        if (env_key) {
-            api_key = env_key;
-        }
     }
     
     if (api_key.empty()) {
         std::cerr << "\nError: No API key provided.\n";
-        std::cerr << "Usage: " << argv[0] << " <api_key>\n";
-        std::cerr << "   Or: export DOME_API_KEY=your-key && " << argv[0] << "\n";
+        std::cerr << "Please set DOME_API_KEY in environment or .env file.\n";
+        std::cerr << "Or usage: " << argv[0] << " <api_key>\n";
         return 1;
     }
-    
     std::cout << "\nAPI Key: " << api_key.substr(0, 8) << "...\n";
+
+    // 2. Load Proxy Wallet
+    std::string proxy_wallet = load_config_value("PROXY_WALLET");
+    if (!proxy_wallet.empty()) {
+        std::cout << "Proxy Wallet: " << proxy_wallet << "\n";
+    } else {
+        std::cout << "Proxy Wallet: [Not Configured - Using demo defaults]\n";
+        // Fallback hardcoded address for default demo behavior if user hasn't set it
+        // Uncomment to force a default: 
+        proxy_wallet = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b";
+    }
     
     // Create client
     DomeSDKConfig config;
@@ -266,10 +251,12 @@ int main(int argc, char* argv[]) {
     demo_market_price(dome);
     demo_candlesticks(dome);
     demo_orderbooks(dome);
-    demo_orders(dome);
-    demo_wallet_pnl(dome);
-    demo_activity(dome);
-    demo_websocket(dome);
+    
+    // Functions that use the wallet
+    demo_orders(dome, proxy_wallet);
+    demo_wallet_pnl(dome, proxy_wallet);
+    demo_activity(dome, proxy_wallet);
+    // WebSocket demo (placeholder) removed
     
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << " Demo Complete!\n";
