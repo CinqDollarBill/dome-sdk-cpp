@@ -8,7 +8,6 @@ A C++ SDK for [Dome API](https://www.domeapi.io/), providing access to predictio
 - **Orders**: Query order data with filtering by market, user, and time range
 - **Wallet Analytics**: Get wallet PnL data with configurable granularity
 - **Activity Tracking**: Track MERGE, SPLIT, and REDEEM activities
-- **WebSocket Support**: Real-time order event subscriptions (placeholder implementation)
 
 ## Requirements
 
@@ -17,21 +16,40 @@ A C++ SDK for [Dome API](https://www.domeapi.io/), providing access to predictio
 - libcurl
 - nlohmann/json (auto-fetched by CMake if not installed)
 
+## Configuration
+
+Create a `.env` file in your project root:
+
+```bash
+DOME_API_KEY=your-api-key
+PROXY_WALLET=0xYourWalletAddress
+```
+
+Or set environment variables:
+
+```bash
+export DOME_API_KEY="your-api-key"
+export PROXY_WALLET="0xYourWalletAddress"
+```
+
+The SDK provides utilities to load these values:
+
+```cpp
+#include <dome_api_sdk/utils.hpp>
+
+std::string api_key = dome::load_config_value("DOME_API_KEY");
+std::string wallet = dome::load_config_value("PROXY_WALLET");
+```
+
 ## Building
 
 ```bash
-# Clone/navigate to the project
 cd dome-sdk-cpp
-
-# Create build directory
 mkdir build && cd build
-
-# Configure and build
 cmake ..
 make
 
-# Run the demo (requires API key)
-export DOME_API_KEY="your-api-key"
+# Run the demo
 ./polymarket_demo
 ```
 
@@ -39,13 +57,15 @@ export DOME_API_KEY="your-api-key"
 
 ```cpp
 #include <dome_api_sdk/client.hpp>
-#include <iostream>
+#include <dome_api_sdk/utils.hpp>
 
 using namespace dome;
 
 int main() {
-    // Initialize client (automatically uses DOME_API_KEY env var)
-    DomeClient dome;
+    // Load API key from environment or .env file
+    DomeSDKConfig config;
+    config.api_key = load_config_value("DOME_API_KEY");
+    DomeClient dome(config);
     
     // Get market price
     auto price = dome.polymarket.markets.get_market_price({
@@ -59,44 +79,10 @@ int main() {
         .limit = 20,
         .min_volume = 100000.0
     });
-    std::cout << "Found " << markets.markets.size() << " markets" << std::endl;
     
     return 0;
 }
 ```
-
-## Running Examples
-
-The SDK comes with two examples in the `examples/` directory:
-
-### 1. Polymarket Demo (`polymarket_demo`)
-A comprehensive demo showcasing all API endpoints (Markets, Orders, Wallet, Activity, WebSocket).
-
-```bash
-# Build
-cd build && make
-
-# Run (requires API key)
-export DOME_API_KEY="your-api-key"
-./polymarket_demo
-
-# Or pass key as argument
-./polymarket_demo "your-api-key"
-```
-
-### 2. Basic Example (`main`)
-This example (found in `examples/main.cpp`) demonstrates the basic usage pattern shown above. Note that `main.cpp` includes additional logic to load the API key from a `.env` file, whereas the simplest SDK usage relies on the `DOME_API_KEY` environment variable directly.
-
-```bash
-# Build
-cd build && make
-
-# Run
-export DOME_API_KEY="your-api-key"
-./main
-```
-
-> **Tip**: The `main` example also supports loading the API key from a `.env` file in the current or parent directory.
 
 ## API Reference
 
@@ -143,7 +129,7 @@ auto orders = dome.polymarket.orders.get_orders({
 
 // Or by user
 auto user_orders = dome.polymarket.orders.get_orders({
-    .user = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b",
+    .user = "0xYourWalletAddress",
     .limit = 100
 });
 ```
@@ -152,7 +138,7 @@ auto user_orders = dome.polymarket.orders.get_orders({
 
 ```cpp
 auto pnl = dome.polymarket.wallet.get_wallet_pnl({
-    .wallet_address = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b",
+    .wallet_address = "0xYourWalletAddress",
     .granularity = dome::Granularity::day,
     .start_time = 1726857600,
     .end_time = 1758316829
@@ -163,30 +149,10 @@ auto pnl = dome.polymarket.wallet.get_wallet_pnl({
 
 ```cpp
 auto activity = dome.polymarket.activity.get_activity({
-    .user = "0x7c3db723f1d4d8cb9c550095203b686cb11e5c6b",
+    .user = "0xYourWalletAddress",
     .limit = 50
 });
 ```
-
-### WebSocket (Placeholder)
-
-```cpp
-auto& ws = dome.polymarket.websocket;
-ws.connect();
-
-auto sub_id = ws.subscribe(
-    {.users = {"0x..."}},
-    [](const dome::WebSocketOrderEvent& event) {
-        std::cout << "Order: " << event.data.user << std::endl;
-    }
-);
-
-// Later...
-ws.unsubscribe(sub_id);
-ws.disconnect();
-```
-
-> **Note**: Full WebSocket implementation requires a WebSocket library (e.g., websocketpp or Boost.Beast).
 
 ## Error Handling
 
@@ -196,17 +162,8 @@ try {
 } catch (const dome::DomeAPIError& e) {
     std::cerr << "API Error: " << e.what() << std::endl;
     std::cerr << "HTTP Code: " << e.status_code << std::endl;
-    std::cerr << "Response: " << e.response_body << std::endl;
 }
 ```
-
-## Environment Variables
-
-```bash
-export DOME_API_KEY="your-api-key"
-```
-
-The SDK will automatically use `DOME_API_KEY` if no key is provided in the config.
 
 ## License
 

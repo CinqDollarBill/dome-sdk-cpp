@@ -259,7 +259,6 @@ int main(int argc, char* argv[]) {
     demo_orders(dome, proxy_wallet);
     demo_wallet_pnl(dome, proxy_wallet);
     demo_activity(dome, proxy_wallet);
-    // WebSocket demo (placeholder) removed
     
     std::cout << "\n" << std::string(60, '=') << "\n";
     std::cout << " Demo Complete!\n";
