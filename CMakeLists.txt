@@ -31,6 +31,8 @@ add_library(dome_sdk
     src/endpoints/orders_endpoints.cpp
     src/endpoints/wallet_endpoints.cpp
     src/endpoints/activity_endpoints.cpp
+    src/endpoints/websocket_client.cpp
+    src/endpoints/dome_websocket.cpp
 
     src/endpoints/polymarket_client.cpp
     src/client.cpp
@@ -44,6 +46,7 @@ target_link_libraries(dome_sdk
     PUBLIC
         CURL::libcurl
         ${JSON_TARGET}
+        ixwebsocket
 )
 
 add_executable(polymarket_demo examples/polymarket_demo.cpp)
@@ -51,6 +54,9 @@ target_link_libraries(polymarket_demo PRIVATE dome_sdk)
 
 add_executable(main examples/main.cpp)
 target_link_libraries(main PRIVATE dome_sdk)
+
+add_executable(websocket_example examples/websocket_example.cpp)
+target_link_libraries(websocket_example PRIVATE dome_sdk)
 
 install(TARGETS dome_sdk
     EXPORT dome_sdk_targets
@@ -61,3 +67,11 @@ install(TARGETS dome_sdk
 install(DIRECTORY include/
     DESTINATION include
 )
+
+include(FetchContent)
+FetchContent_Declare(
+    ixwebsocket
+    GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
+    GIT_TAG v11.4.5
+)
+FetchContent_MakeAvailable(ixwebsocket)

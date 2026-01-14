@@ -8,13 +8,16 @@ A C++ SDK for [Dome API](https://www.domeapi.io/), providing access to predictio
 - **Orders**: Query order data with filtering by market, user, and time range
 - **Wallet Analytics**: Get wallet PnL data with configurable granularity
 - **Activity Tracking**: Track MERGE, SPLIT, and REDEEM activities
+- **WebSocket**: Real-time order streaming with subscription management
 
 ## Requirements
 
 - C++17 or later
 - CMake 3.14+
 - libcurl
-- nlohmann/json (auto-fetched by CMake if not installed)
+- OpenSSL (for WebSocket TLS support)
+- nlohmann/json (auto-fetched by CMake)
+- ixwebsocket (auto-fetched by CMake)
 
 ## Configuration
 
@@ -46,11 +49,14 @@ std::string wallet = dome::load_config_value("PROXY_WALLET");
 ```bash
 cd dome-sdk-cpp
 mkdir build && cd build
-cmake ..
+cmake .. -DUSE_TLS=ON -DUSE_OPEN_SSL=ON
 make
 
 # Run the demo
 ./polymarket_demo
+
+# Run the WebSocket example
+./websocket_example
 ```
 
 ## Basic Usage
@@ -152,6 +158,45 @@ auto activity = dome.polymarket.activity.get_activity({
     .user = "0xYourWalletAddress",
     .limit = 50
 });
+```
+
+### WebSocket
+
+Real-time order streaming from Polymarket:
+
+```cpp
+#include <dome_api_sdk/dome_websocket.hpp>
+
+dome::DomeWebSocket ws(api_key);
+
+// Set up callbacks
+ws.set_order_event_callback([](const dome::WebSocketOrderEvent& event) {
+    std::cout << "Order: " << event.data.side << " " 
+              << event.data.shares_normalized << " shares @ " 
+              << event.data.price << std::endl;
+});
+
+ws.set_ack_callback([](const std::string& sub_id) {
+    std::cout << "Subscribed: " << sub_id << std::endl;
+});
+
+ws.set_connected_callback([&ws]() {
+    // Subscribe to wallet addresses
+    ws.subscribe({"0x123...", "0x456..."});
+});
+
+// Connect and run
+ws.connect();
+
+// Later: unsubscribe
+ws.unsubscribe(subscription_id);
+ws.disconnect();
+```
+
+Run the WebSocket example:
+
+```bash
+./websocket_example
 ```
 
 ## Error Handling

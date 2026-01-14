@@ -23,7 +23,7 @@ namespace dome {
 struct DomeSDKConfig {
     std::string api_key;
     std::string base_url = "https://api.domeapi.io/v1";
-    float timeout = 30.0f;
+    int64_t timeout = 30.0f;
 };
 
 /**
@@ -33,8 +33,14 @@ struct DomeSDKConfig {
  * @param headers Additional headers to include
  */
 struct RequestConfig {
-    float timeout = 30.0f;
+    int64_t timeout = 30.0f;
     std::map<std::string, std::string> headers;
+};
+
+// Order Side enum
+enum class OrderSide {
+    BUY,
+    SELL
 };
 
 // Market Price Types
@@ -274,7 +280,7 @@ struct Order {
     std::string side;  // "BUY" or "SELL"
     std::string market_slug;
     std::string condition_id;
-    int64_t shares;
+    float shares;
     double shares_normalized;
     double price;
     std::string tx_hash;
@@ -402,7 +408,7 @@ struct GetOrderbooksParams {
  */
 struct MarketSide {
     std::string id;
-    std::string label;
+    std::string side;  // Added type
 };
 
 /**
@@ -634,6 +640,29 @@ enum class HTTPMethod {
     DELETE_
 };
 
+// Websocket
+struct OrderEventData {
+    std::string token_id;
+    std::string token_label;
+    OrderSide side;
+    std::string market_slug;
+    std::string condition_id;
+    float shares;
+    float shares_normalized;
+    double price;
+    std::string tx_hash;
+    std::string title;
+    int64_t timestamp;
+    std::string order_hash;
+    std::string user;
+    std::string taker;
+};
+
+struct OrderEvent {
+    std::string type;
+    std::string subscription_id;
+    OrderEventData data;
+};
 }  // namespace dome
 
 #endif  // DOME_TYPES_HPP

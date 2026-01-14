@@ -108,13 +108,13 @@ MarketsResponse MarketEndpoints::get_markets(const GetMarketsParams& params) {
             // Parse side_a
             if (item.contains("side_a")) {
                 market.side_a.id = item["side_a"].value("id", "");
-                market.side_a.label = item["side_a"].value("label", "");
+                market.side_a.side = item["side_a"].value("side", "");
             }
             
             // Parse side_b
             if (item.contains("side_b")) {
                 market.side_b.id = item["side_b"].value("id", "");
-                market.side_b.label = item["side_b"].value("label", "");
+                market.side_b.side = item["side_b"].value("side", "");
             }
             
             if (item.contains("tags") && item["tags"].is_array()) {
